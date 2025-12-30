@@ -29,6 +29,7 @@ module "eks" {
   eks_cluster_security_group_id = module.eks.default_cluster_security_group_id
   kms_key_arn                   = module.kms.kms_key.arn
   bastion_sg_id                 = module.ec2.bastion_sg_id
+  eks_deployment_role_arn       = module.iam.eks_deployment_role_arn
 }
 
 module "alb" {
@@ -161,9 +162,21 @@ module "iam" {
   region            = var.aws_region
   namespace         = "cedeprod"
   service_account_name = "cede-sa"
+  eks_cluster_name  = module.eks.cluster_name
   tags              = var.tags
 }
 
+module "vpc_peering" {
+  source                    = "./modules/vpc_peering"
+  project_name              = var.project_name
+  project_segment           = var.project_segment
+  project_env               = var.project_env
+  tags                      = var.tags
+  vpc_peering_connection_id = var.vpc_peering_connection_id
+  jenkins_vpc_cidr          = var.jenkins_vpc_cidr
+  public_route_table_id     = module.vpc.public_route_table_id
+  private_route_table_id    = module.vpc.private_route_table_id
+}
 /*module "ses" {
   source = "./modules/ses"
 

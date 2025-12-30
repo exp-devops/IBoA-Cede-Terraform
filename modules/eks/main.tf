@@ -98,6 +98,16 @@ resource "aws_security_group_rule" "eks_cluster_from_bastion" {
   description              = "Allow HTTPS traffic from bastion host to EKS cluster"
 }
 
+resource "aws_security_group_rule" "eks_cluster_from_jenkins" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = [var.jenkins_vpc_cidr]
+  security_group_id = aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
+  description       = "Allow HTTPS traffic from Jenkins VPC to EKS cluster API"
+}
+
 # EKS Access Entry for IAM User
 resource "aws_eks_access_policy_association" "devops_user" {
   cluster_name  = aws_eks_cluster.main.name
@@ -114,6 +124,26 @@ resource "aws_eks_access_entry" "devops_user" {
   cluster_name  = aws_eks_cluster.main.name
   principal_arn = "arn:aws:iam::769537049539:user/devopsexperioncede"
   type          = "STANDARD"
+}
+
+# EKS Access Entry for EKS Deployment Role
+resource "aws_eks_access_entry" "eks_deployment_role" {
+  cluster_name  = aws_eks_cluster.main.name
+  principal_arn = var.eks_deployment_role_arn
+  type          = "STANDARD"
+}
+
+# EKS Access Policy Association for EKS Deployment Role
+resource "aws_eks_access_policy_association" "eks_deployment_role" {
+  cluster_name  = aws_eks_cluster.main.name
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSEditPolicy"
+  principal_arn = var.eks_deployment_role_arn
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [aws_eks_access_entry.eks_deployment_role]
 }
 
 # EKS Add-ons
@@ -185,7 +215,7 @@ resource "aws_security_group" "eks_cluster" {
 # EKS Node Groups
 resource "aws_eks_node_group" "node_group_CEDE" {
   cluster_name    = aws_eks_cluster.main.name
-  node_group_name = "${var.project_name}-${var.project_segment}-${var.project_env}-SOLVI"
+  node_group_name = "${var.project_name}-${var.project_segment}-${var.project_env}-CEDE"
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = [var.private_subnet_01]
   instance_types  = [var.eksProperty["NODE_INSTANCE_TYPE"]]
@@ -216,7 +246,7 @@ resource "aws_eks_node_group" "node_group_CEDE" {
   tags = merge(
     var.tags,
     {
-      Name = "${var.project_name}-${var.project_segment}-${var.project_env}-Solvi-NG"
+      Name = "${var.project_name}-${var.project_segment}-${var.project_env}-Cede-NG"
     }
   )
 }

@@ -63,3 +63,14 @@ variable "bastion_sg_id" {
   description = "Security group ID for the bastion host to allow access to EKS cluster"
 }
 
+variable "eks_deployment_role_arn" {
+  type        = string
+  description = "ARN of the EKS deployment IAM role for access entry"
+}
+
+variable "jenkins_vpc_cidr" {
+  type        = string
+  description = "CIDR block of Jenkins VPC for cross-account access to EKS cluster"
+  default     = "10.15.0.0/16"
+}
+
