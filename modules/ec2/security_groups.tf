@@ -26,8 +26,8 @@ resource "aws_security_group" "bastion_sg" {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      cidr_blocks = [egress.key]
-      description = "Allow all outbound to ${egress.value}"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all outbound traffic"
     }
   }
 
