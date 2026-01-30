@@ -259,14 +259,10 @@ resource "aws_iam_role" "grafana_cloudwatch_role" {
       {
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${var.grafana_account_id}:root"
+          AWS = "arn:aws:iam::${var.grafana_account_id}:role/IBoA_grafana"
         }
         Action = "sts:AssumeRole"
-        Condition = {
-          StringEquals = {
-            "sts:ExternalId" = "${data.aws_caller_identity.current.account_id}-grafana"
-          }
-        }
+        Condition = {}
       }
     ]
   })
