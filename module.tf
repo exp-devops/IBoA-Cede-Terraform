@@ -32,25 +32,25 @@ module "eks" {
   eks_deployment_role_arn       = module.iam.eks_deployment_role_arn
 }
 
-module "alb" {
-  source           = "./modules/alb"
-  project_name     = var.project_name
-  project_segment  = var.project_segment
-  project_env      = var.project_env
-  tags             = var.tags
-  vpc_id           = module.vpc.vpc_id
-  public_subnet_01 = module.vpc.public_subnet_01
-  public_subnet_02 = module.vpc.public_subnet_02
-  kms_key_arn      = module.kms.kms_key.arn
-}
+# module "alb" {
+#   source           = "./modules/alb"
+#   project_name     = var.project_name
+#   project_segment  = var.project_segment
+#   project_env      = var.project_env
+#   tags             = var.tags
+#   vpc_id           = module.vpc.vpc_id
+#   public_subnet_01 = module.vpc.public_subnet_01
+#   public_subnet_02 = module.vpc.public_subnet_02
+#   kms_key_arn      = module.kms.kms_key.arn
+# }
 
-module "waf" {
-  source       = "./modules/waf"
-  project_name = var.project_name
-  project_env  = var.project_env
-  tags         = var.tags
-  alb_arn      = module.alb.alb_arn
-}
+# module "waf" {
+#   source       = "./modules/waf"
+#   project_name = var.project_name
+#   project_env  = var.project_env
+#   tags         = var.tags
+#   alb_arn      = module.alb.alb_arn
+# }
 
 module "secrets_manager" {
   source                = "./modules/secrets_manager"
@@ -92,15 +92,15 @@ module "ecr" {
   project_env     = var.project_env
 }
 
-module "s3" {
-  source          = "./modules/s3"
-  project_name    = var.project_name
-  project_segment = var.project_segment
-  project_env     = var.project_env
-  tags            = var.tags
-  aws_account_id  = data.aws_caller_identity.current.account_id
-  kms_key_arn     = module.kms.kms_key.arn
-}
+# module "s3" {
+#   source          = "./modules/s3"
+#   project_name    = var.project_name
+#   project_segment = var.project_segment
+#   project_env     = var.project_env
+#   tags            = var.tags
+#   aws_account_id  = data.aws_caller_identity.current.account_id
+#   kms_key_arn     = module.kms.kms_key.arn
+# }
 
 /*module "cloudfront" {
   source                       = "./modules/cloudfront"
@@ -166,17 +166,17 @@ module "iam" {
   tags              = var.tags
 }
 
-module "vpc_peering" {
-  source                    = "./modules/vpc_peering"
-  project_name              = var.project_name
-  project_segment           = var.project_segment
-  project_env               = var.project_env
-  tags                      = var.tags
-  vpc_peering_connection_id = var.vpc_peering_connection_id
-  jenkins_vpc_cidr          = var.jenkins_vpc_cidr
-  public_route_table_id     = module.vpc.public_route_table_id
-  private_route_table_id    = module.vpc.private_route_table_id
-}
+# module "vpc_peering" {
+#   source                    = "./modules/vpc_peering"
+#   project_name              = var.project_name
+#   project_segment           = var.project_segment
+#   project_env               = var.project_env
+#   tags                      = var.tags
+#   vpc_peering_connection_id = var.vpc_peering_connection_id
+#   jenkins_vpc_cidr          = var.jenkins_vpc_cidr
+#   public_route_table_id     = module.vpc.public_route_table_id
+#   private_route_table_id    = module.vpc.private_route_table_id
+# }
 /*module "ses" {
   source = "./modules/ses"
 
