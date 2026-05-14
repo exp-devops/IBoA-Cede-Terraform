@@ -62,6 +62,7 @@ module "secrets_manager" {
   rdsProperty           = var.rdsProperty
   cede_rds_username    = module.rds.cede_rds_username
   cede_rds_password    = module.rds.cede_rds_password
+  #cede_rds_master_password = module.rds.cede_rds_master_password
 }
 
 /*module "acm" {
@@ -166,17 +167,17 @@ module "iam" {
   tags              = var.tags
 }
 
-# module "vpc_peering" {
-#   source                    = "./modules/vpc_peering"
-#   project_name              = var.project_name
-#   project_segment           = var.project_segment
-#   project_env               = var.project_env
-#   tags                      = var.tags
-#   vpc_peering_connection_id = var.vpc_peering_connection_id
-#   jenkins_vpc_cidr          = var.jenkins_vpc_cidr
-#   public_route_table_id     = module.vpc.public_route_table_id
-#   private_route_table_id    = module.vpc.private_route_table_id
-# }
+module "vpc_peering" {
+  source                    = "./modules/vpc_peering"
+  project_name              = var.project_name
+  project_segment           = var.project_segment
+  project_env               = var.project_env
+  tags                      = var.tags
+  vpc_peering_connection_id = var.vpc_peering_connection_id
+  jenkins_vpc_cidr          = var.jenkins_vpc_cidr
+  public_route_table_id     = module.vpc.public_route_table_id
+  private_route_table_id    = module.vpc.private_route_table_id
+}
 /*module "ses" {
   source = "./modules/ses"
 
