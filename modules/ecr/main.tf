@@ -3,14 +3,14 @@
 locals {
   repositories = [
     "cede-integration-service",
-    "cede-ui-service"
+    "cede-ui"
   ]
 }
 
 resource "aws_ecr_repository" "repositories" {
   for_each = toset(local.repositories)
 
-  name                 = "${var.project_name}-${var.project_segment}-${var.project_env}-${each.value}"
+  name                 = each.value
   image_tag_mutability = "IMMUTABLE"
 
   encryption_configuration {
@@ -21,10 +21,10 @@ resource "aws_ecr_repository" "repositories" {
     scan_on_push = true
   }
 
-  tags = merge(
+  tags = merge( 
     var.tags,
     {
-      Name        = "${var.project_name}-${var.project_segment}-${var.project_env}-${each.value}"
+      #Name        = "${var.project_name}-${var.project_segment}-${var.project_env}-${each.value}"
       Service     = each.value
       Environment = var.project_env
     }

@@ -1,13 +1,13 @@
 # Create secret for PostgreSQL RDS
 resource "aws_secretsmanager_secret" "postgres_rds_credentials" {
-  name        = "${var.project_name}-${var.project_segment}-${var.project_env}-redentials"
+  name        = "${var.project_name}-${var.project_segment}-${var.project_env}-RDSCredentials"
   description = "PostgreSQL RDS credentials for ${var.project_name}-${var.project_env}"
   kms_key_id  = var.kms_key_id
 
   tags = merge(
     var.tags,
     {
-      Name     = "${var.project_name}-${var.project_segment}-${var.project_env}-redentials"
+      Name     = "${var.project_name}-${var.project_segment}-${var.project_env}-RDSCredentials"
       Database = "PostgreSQL"
     }
   )
@@ -19,8 +19,8 @@ resource "aws_secretsmanager_secret_version" "postgres_rds_credentials" {
     username = var.cede_rds_username
     password = var.cede_rds_password
     #master_password = var.cede_rds_master_password
-    engine   = "postgres"
-    port     = var.rdsProperty["PORT"]
+    engine = "postgres"
+    port   = var.rdsProperty["PORT"]
   })
 }
 # Create a resource policy for PostgreSQL credentials
@@ -52,3 +52,19 @@ resource "aws_secretsmanager_secret_policy" "postgres_rds_credentials" {
 
 # Get current AWS account ID
 data "aws_caller_identity" "current" {}
+
+# Create secret for Application Configuration
+resource "aws_secretsmanager_secret" "iboa_app_config" {
+  name        = "IBoASecretManager"
+  description = "Application configuration for IBoA"
+  kms_key_id  = var.kms_key_id
+
+  tags = merge(
+    var.tags,
+    {
+      Name        = "IBoASecretManager"
+      Type        = "ApplicationConfig"
+      Environment = var.project_env
+    }
+  )
+}

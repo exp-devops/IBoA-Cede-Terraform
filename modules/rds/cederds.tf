@@ -60,7 +60,7 @@ resource "aws_db_instance" "cede_db_instance" {
   username = var.rdsProperty["USERNAME"]
   password = random_password.master_password_rds_cede.result
   db_name  = var.rdsProperty["DATABASE_NAME"]
-  
+
 
   tags = merge(
     local.common_tags,

@@ -98,6 +98,26 @@ output "grafana_cloudwatch_role_arn" {
   value       = aws_iam_role.grafana_cloudwatch_role.arn
 }
 
+output "cluster_autoscaler_role_arn" {
+  description = "ARN of the EKS Cluster Autoscaler IAM role"
+  value       = aws_iam_role.cluster_autoscaler.arn
+}
+
+output "cluster_autoscaler_role_name" {
+  description = "Name of the EKS Cluster Autoscaler IAM role"
+  value       = aws_iam_role.cluster_autoscaler.name
+}
+
+output "cluster_autoscaler_policy_arn" {
+  description = "ARN of the Cluster Autoscaler IAM policy"
+  value       = aws_iam_policy.cluster_autoscaler.arn
+}
+
+output "cluster_autoscaler_policy_name" {
+  description = "Name of the Cluster Autoscaler IAM policy"
+  value       = aws_iam_policy.cluster_autoscaler.name
+}
+
 output "grafana_cloudwatch_role_name" {
   description = "Name of the Grafana CloudWatch cross-account IAM role"
   value       = aws_iam_role.grafana_cloudwatch_role.name

@@ -53,29 +53,26 @@ module "eks" {
 # }
 
 module "secrets_manager" {
-  source                = "./modules/secrets_manager"
-  project_name          = var.project_name
-  project_segment       = var.project_segment
-  project_env           = var.project_env
-  tags                  = var.tags
-  kms_key_id            = module.kms.kms_key.id
-  rdsProperty           = var.rdsProperty
-  cede_rds_username    = module.rds.cede_rds_username
-  cede_rds_password    = module.rds.cede_rds_password
+  source            = "./modules/secrets_manager"
+  project_name      = var.project_name
+  project_segment   = var.project_segment
+  project_env       = var.project_env
+  tags              = var.tags
+  kms_key_id        = module.kms.kms_key.id
+  rdsProperty       = var.rdsProperty
+  cede_rds_username = module.rds.cede_rds_username
+  cede_rds_password = module.rds.cede_rds_password
   #cede_rds_master_password = module.rds.cede_rds_master_password
 }
 
-/*module "acm" {
+module "acm" {
   source                    = "./modules/acm"
   tags                      = var.tags
   project_name              = var.project_name
   domain_name               = var.domain_name
   subject_alternative_names = var.subject_alternative_names
   project_env               = var.project_env
-  aws_cli_profile_name      = var.aws_cli_profile_name
-  cdn_aws_region            = var.cdn_aws_region
-  alb_domain_name           = var.alb_domain_name
-}*/
+}
 
 module "kms" {
   source          = "./modules/kms"
@@ -119,10 +116,10 @@ module "ecr" {
 }*/
 
 module "rds" {
-  source            = "./modules/rds"
-  aws_region        = var.aws_region
-  project_segment   = var.project_segment
-  rdsProperty       = var.rdsProperty
+  source          = "./modules/rds"
+  aws_region      = var.aws_region
+  project_segment = var.project_segment
+  rdsProperty     = var.rdsProperty
 
   project_name      = var.project_name
   project_env       = var.project_env
@@ -133,7 +130,7 @@ module "rds" {
   kms_key           = module.kms.kms_key
   network_cidr      = var.network_cidr
   # Security group variables for RDS internal security groups
-  cede_rds_allowed_ips         = var.cede_rds_allowed_ips
+  cede_rds_allowed_ips          = var.cede_rds_allowed_ips
   bastion_sg_id                 = module.ec2.bastion_sg_id
   eks_cluster_security_group_id = module.eks.default_cluster_security_group_id
 }
@@ -150,21 +147,21 @@ module "ec2" {
   vpc_id                        = module.vpc.vpc_id
   bastion_ssh_allowed_ips       = var.bastion_ssh_allowed_ips
   eks_cluster_security_group_id = module.eks.default_cluster_security_group_id
-  cede_rds_sg_id               = module.rds.cede_rds_sg_id
+  cede_rds_sg_id                = module.rds.cede_rds_sg_id
   igw_id                        = module.vpc.igw_id
   kms_key                       = module.kms.kms_key.arn
   bastionEC2                    = var.bastionEC2
 }
 
 module "iam" {
-  source            = "./modules/iam"
-  oidc_provider_arn = module.eks.oidc_provider_arn
-  oidc_provider_url = module.eks.oidc_provider_url
-  region            = var.aws_region
-  namespace         = "cedeprod"
+  source               = "./modules/iam"
+  oidc_provider_arn    = module.eks.oidc_provider_arn
+  oidc_provider_url    = module.eks.oidc_provider_url
+  region               = var.aws_region
+  namespace            = "cedeprod"
   service_account_name = "cede-sa"
-  eks_cluster_name  = module.eks.cluster_name
-  tags              = var.tags
+  eks_cluster_name     = module.eks.cluster_name
+  tags                 = var.tags
 }
 
 module "vpc_peering" {

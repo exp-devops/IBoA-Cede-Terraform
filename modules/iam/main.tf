@@ -4,8 +4,8 @@ data "aws_caller_identity" "current" {}
 # IAM Policy for secret readonly
 resource "aws_iam_policy" "secret_readonly_irsa" {
   name        = "secret-readonly-irsa"
-  description = "Policy to allow reading secrets from AWS Secrets Manager"
-  
+  description = "Policy to allow reading IBoASecretManager secret from AWS Secrets Manager"
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -14,7 +14,7 @@ resource "aws_iam_policy" "secret_readonly_irsa" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:*"
+        Resource = "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:IBoASecretManager-*"
       }
     ]
   })
@@ -25,7 +25,7 @@ resource "aws_iam_policy" "secret_readonly_irsa" {
 # IAM Role with trust relationship for IRSA
 resource "aws_iam_role" "cede_irsa_role" {
   name = "cede-irsa-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -57,7 +57,7 @@ resource "aws_iam_role_policy_attachment" "cede_irsa_policy_attachment" {
 resource "aws_iam_policy" "aws_ecr" {
   name        = "AWS_ecr"
   description = "Policy to allow ECR push operations"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -89,7 +89,7 @@ resource "aws_iam_policy" "aws_ecr" {
 resource "aws_iam_policy" "eks_readonly" {
   name        = "EKS_readonly"
   description = "Policy to allow read-only access to EKS clusters"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -145,13 +145,13 @@ resource "aws_iam_group_policy_attachment" "jenkins_policy" {
 resource "aws_iam_policy" "eks_deployment_policy" {
   name        = "EKS_deployment_policy"
   description = "Policy to allow EKS cluster describe operations"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = "eks:DescribeCluster"
+        Effect   = "Allow"
+        Action   = "eks:DescribeCluster"
         Resource = "arn:aws:eks:${var.region}:${data.aws_caller_identity.current.account_id}:cluster/${var.eks_cluster_name}"
       }
     ]
@@ -163,7 +163,7 @@ resource "aws_iam_policy" "eks_deployment_policy" {
 # IAM Role for EKS deployment
 resource "aws_iam_role" "eks_deployment_role" {
   name = "EKS_deployment_role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -196,7 +196,7 @@ resource "aws_iam_role_policy_attachment" "eks_deployment_ecr_attachment" {
 resource "aws_iam_policy" "grafana_cloudwatch_policy" {
   name        = "GrafanaCloudWatchAccessPolicy"
   description = "Policy to allow Amazon Managed Grafana to read CloudWatch metrics and logs for EKS monitoring"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -252,7 +252,7 @@ resource "aws_iam_policy" "grafana_cloudwatch_policy" {
 resource "aws_iam_role" "grafana_cloudwatch_role" {
   name        = "GrafanaCloudWatchCrossAccountRole"
   description = "Cross-account role for Amazon Managed Grafana to access CloudWatch metrics and logs"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -261,7 +261,7 @@ resource "aws_iam_role" "grafana_cloudwatch_role" {
         Principal = {
           AWS = "arn:aws:iam::${var.grafana_account_id}:role/IBoA_grafana"
         }
-        Action = "sts:AssumeRole"
+        Action    = "sts:AssumeRole"
         Condition = {}
       }
     ]
@@ -270,7 +270,7 @@ resource "aws_iam_role" "grafana_cloudwatch_role" {
   tags = merge(
     var.tags,
     {
-      Name = "GrafanaCloudWatchCrossAccountRole"
+      Name    = "GrafanaCloudWatchCrossAccountRole"
       Purpose = "Cross-account monitoring for Amazon Managed Grafana"
     }
   )
@@ -280,4 +280,79 @@ resource "aws_iam_role" "grafana_cloudwatch_role" {
 resource "aws_iam_role_policy_attachment" "grafana_cloudwatch_attachment" {
   policy_arn = aws_iam_policy.grafana_cloudwatch_policy.arn
   role       = aws_iam_role.grafana_cloudwatch_role.name
+}
+
+# IAM Policy for EKS Cluster Autoscaler
+resource "aws_iam_policy" "cluster_autoscaler" {
+  name        = "cluster_autoscaler"
+  description = "Policy for EKS Cluster Autoscaler to manage Auto Scaling groups"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "autoscaling:DescribeLaunchConfigurations",
+          "autoscaling:DescribeScalingActivities",
+          "ec2:DescribeImages",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeLaunchTemplateVersions",
+          "ec2:GetInstanceTypesFromInstanceRequirements",
+          "eks:DescribeNodegroup"
+        ]
+        Resource = ["*"]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "autoscaling:SetDesiredCapacity",
+          "autoscaling:TerminateInstanceInAutoScalingGroup"
+        ]
+        Resource = ["*"]
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+# IAM Role for EKS Cluster Autoscaler with OIDC trust relationship
+resource "aws_iam_role" "cluster_autoscaler" {
+  name        = "AmazonEKSClusterAutoscalerRole"
+  description = "IAM role for EKS Cluster Autoscaler with IRSA"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = var.oidc_provider_arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(var.oidc_provider_url, "https://", "")}:aud" = "sts.amazonaws.com"
+            "${replace(var.oidc_provider_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:cluster-autoscaler"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "AmazonEKSClusterAutoscalerRole"
+    }
+  )
+}
+
+# Attach Cluster Autoscaler policy to the role
+resource "aws_iam_role_policy_attachment" "cluster_autoscaler_attachment" {
+  policy_arn = aws_iam_policy.cluster_autoscaler.arn
+  role       = aws_iam_role.cluster_autoscaler.name
 }

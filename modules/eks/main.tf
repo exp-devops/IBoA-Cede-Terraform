@@ -34,7 +34,7 @@ resource "tls_private_key" "eks_key" {
 # Save EKS private key locally
 resource "local_file" "eks_private_key" {
   content         = tls_private_key.eks_key.private_key_pem
-  filename        = "${path.root}/keys/${var.project_name}-${var.project_segment}-${var.project_env}-eks-key.pem"
+  filename        = "${path.root}/pem/${var.project_name}-${var.project_segment}-${var.project_env}-eks-key.pem"
   file_permission = "0400" # Read-only for the current user
 }
 
@@ -255,6 +255,44 @@ resource "aws_eks_node_group" "node_group_CEDE" {
     var.tags,
     {
       Name = "${var.project_name}-${var.project_segment}-${var.project_env}-Cede-NG"
+    }
+  )
+}
+
+resource "aws_eks_node_group" "node_group_VLM" {
+  cluster_name    = aws_eks_cluster.main.name
+  node_group_name = "${var.project_name}-${var.project_segment}-${var.project_env}-VLM"
+  node_role_arn   = aws_iam_role.eks_node_role.arn
+  subnet_ids      = [var.private_subnet_01]
+  instance_types  = [var.eksProperty["VLM_NODE_INSTANCE_TYPE"]]
+  disk_size       = tonumber(var.eksProperty["VLM_NODE_DISK_SIZE"])
+
+  scaling_config {
+    desired_size = tonumber(var.eksProperty["VLM_DESIRED_SIZE"])
+    max_size     = tonumber(var.eksProperty["VLM_MAX_SIZE"])
+    min_size     = tonumber(var.eksProperty["VLM_MIN_SIZE"])
+  }
+
+  remote_access {
+    ec2_ssh_key               = aws_key_pair.eks_key_pair.key_name
+    source_security_group_ids = [aws_security_group.eks_remote_access.id]
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_node_policy,
+    aws_iam_role_policy_attachment.eks_cni_policy,
+    aws_iam_role_policy_attachment.ecr_read_only
+  ]
+
+  labels = {
+    dedicated   = "vlm"
+    Environment = var.project_env
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.project_name}-${var.project_segment}-${var.project_env}-VLM-NG"
     }
   )
 }
