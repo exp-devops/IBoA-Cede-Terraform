@@ -289,6 +289,12 @@ resource "aws_eks_node_group" "node_group_VLM" {
     Environment = var.project_env
   }
 
+  taint {
+    key    = "dedicated"
+    value  = "vlm"
+    effect = "NO_SCHEDULE"
+  }
+
   tags = merge(
     var.tags,
     {

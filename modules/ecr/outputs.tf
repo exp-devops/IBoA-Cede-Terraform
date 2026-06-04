@@ -36,3 +36,7 @@ output "cede_ui_service_url" {
   value       = aws_ecr_repository.repositories["cede-ui"].repository_url
 }
 
+output "cede_vlm_service_url" {
+  description = "ECR URL for cede-vlm-service"
+  value       = aws_ecr_repository.repositories["cede-vlm"].repository_url
+}

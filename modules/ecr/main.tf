@@ -3,7 +3,8 @@
 locals {
   repositories = [
     "cede-integration-service",
-    "cede-ui"
+    "cede-ui",
+    "cede-vlm"
   ]
 }
 
