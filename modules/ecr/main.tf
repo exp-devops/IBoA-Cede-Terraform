@@ -4,7 +4,8 @@ locals {
   repositories = [
     "cede-integration-service",
     "cede-ui",
-    "cede-vlm"
+    "cede-vlm",
+    "cede-liquibase"
   ]
 }
 

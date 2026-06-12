@@ -40,3 +40,8 @@ output "cede_vlm_service_url" {
   description = "ECR URL for cede-vlm-service"
   value       = aws_ecr_repository.repositories["cede-vlm"].repository_url
 }
+
+output "cede_liquibase_service_url" {
+  description = "ECR URL for cede-liquibase-service"
+  value       = aws_ecr_repository.repositories["cede-liquibase"].repository_url
+}
