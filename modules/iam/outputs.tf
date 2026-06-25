@@ -127,3 +127,30 @@ output "grafana_external_id" {
   description = "External ID to use when configuring the data source in Grafana"
   value       = "${data.aws_caller_identity.current.account_id}-grafana"
 }
+
+output "qacededevelopereks_user_name" {
+  description = "Name of the qacededevelopereks IAM user"
+  value       = aws_iam_user.qacededevelopereks.name
+}
+
+output "qacededevelopereks_user_arn" {
+  description = "ARN of the qacededevelopereks IAM user"
+  value       = aws_iam_user.qacededevelopereks.arn
+}
+
+output "qacededevelopereks_access_key_id" {
+  description = "Access key ID for qacededevelopereks user"
+  value       = aws_iam_access_key.qacededevelopereks_access_key.id
+}
+
+output "qacededevelopereks_secret_access_key" {
+  description = "Secret access key for qacededevelopereks user"
+  value       = aws_iam_access_key.qacededevelopereks_access_key.secret
+  sensitive   = true
+}
+
+output "qacededevelopereks_console_password" {
+  description = "Initial console password for qacededevelopereks user"
+  value       = aws_iam_user_login_profile.qacededevelopereks_login_profile.password
+  sensitive   = true
+}

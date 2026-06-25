@@ -139,6 +139,14 @@ resource "aws_network_acl_rule" "allow_ephemeral_outbound" {
   egress         = true
 }
 
+resource "aws_network_acl_rule" "allow_all_outbound" {
+  network_acl_id = aws_network_acl.tf_vpc_nacl.id
+  rule_number    = 270
+  protocol       = "-1"
+  rule_action    = "allow"
+  cidr_block     = "0.0.0.0/0"
+  egress         = true
+}
 ######## Inbound Rules #######
 
 # Allow HTTP inbound

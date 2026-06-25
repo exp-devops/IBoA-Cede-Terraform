@@ -17,13 +17,13 @@ variable "region" {
 variable "namespace" {
   description = "Kubernetes namespace for the service account"
   type        = string
-  default     = "solviprod"
+  default     = "cedeqa"
 }
 
 variable "service_account_name" {
   description = "Name of the Kubernetes service account"
   type        = string
-  default     = "solvi-sa"
+  default     = "cede-sa"
 }
 
 variable "tags" {
@@ -41,4 +41,14 @@ variable "grafana_account_id" {
   description = "AWS account ID where Amazon Managed Grafana is deployed"
   type        = string
   default     = "796973480744"
+}
+
+variable "kms_key_arn" {
+  description = "ARN of the KMS key to allow the IRSA role to read/decrypt"
+  type        = string
+}
+
+variable "bastion_instance_id" {
+  description = "ID of the bastion EC2 instance used for SSM session access"
+  type        = string
 }

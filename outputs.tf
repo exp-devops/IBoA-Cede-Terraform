@@ -34,3 +34,31 @@ output "dns_validation_instructions" {
   
   EOT
 }
+
+# Ingress ALB Security Group Outputs
+output "ingress_alb_sg_id" {
+  description = "Security group ID to attach to the Kubernetes Ingress ALB via annotation: alb.ingress.kubernetes.io/security-groups"
+  value       = module.security_groups.ingress_alb_sg_id
+}
+
+output "ingress_alb_sg_arn" {
+  description = "ARN of the Ingress ALB security group"
+  value       = module.security_groups.ingress_alb_sg_arn
+}
+
+output "qacededevelopereks_console_password" {
+  description = "Initial console password for qacededevelopereks IAM user"
+  value       = module.iam.qacededevelopereks_console_password
+  sensitive   = true
+}
+
+output "qacededevelopereks_access_key_id" {
+  description = "Access key ID for qacededevelopereks IAM user"
+  value       = module.iam.qacededevelopereks_access_key_id
+}
+
+output "qacededevelopereks_secret_access_key" {
+  description = "Secret access key for qacededevelopereks IAM user"
+  value       = module.iam.qacededevelopereks_secret_access_key
+  sensitive   = true
+}

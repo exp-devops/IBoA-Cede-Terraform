@@ -158,10 +158,21 @@ module "iam" {
   oidc_provider_arn    = module.eks.oidc_provider_arn
   oidc_provider_url    = module.eks.oidc_provider_url
   region               = var.aws_region
-  namespace            = "cedeprod"
+  namespace            = "cedeqa"
   service_account_name = "cede-sa"
   eks_cluster_name     = module.eks.cluster_name
   tags                 = var.tags
+  kms_key_arn          = module.kms.kms_key.arn
+  bastion_instance_id  = module.ec2.bastion_instance_id
+}
+
+module "security_groups" {
+  source          = "./modules/security_groups"
+  project_name    = var.project_name
+  project_segment = var.project_segment
+  project_env     = var.project_env
+  tags            = var.tags
+  vpc_id          = module.vpc.vpc_id
 }
 
 module "vpc_peering" {
