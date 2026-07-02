@@ -240,23 +240,108 @@ resource "aws_security_group" "eks_cluster" {
 }*/
 
 # EKS Node Groups
+resource "aws_launch_template" "node_group_cede" {
+  name_prefix = "${var.project_name}-${var.project_segment}-${var.project_env}-cede-ng-"
+  key_name    = aws_key_pair.eks_key_pair.key_name
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size = tonumber(var.eksProperty["NODE_DISK_SIZE"])
+      volume_type = "gp3"
+      encrypted   = true
+      kms_key_id  = var.kms_key_arn
+    }
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = merge(
+      var.tags,
+      {
+        Name = "${var.project_name}-${var.project_segment}-${var.project_env}-Cede-NG"
+      }
+    )
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+    tags = merge(
+      var.tags,
+      {
+        Name = "${var.project_name}-${var.project_segment}-${var.project_env}-Cede-NG-Volume"
+      }
+    )
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.project_name}-${var.project_segment}-${var.project_env}-Cede-NG-LT"
+    }
+  )
+}
+
+resource "aws_launch_template" "node_group_vlm" {
+  name_prefix = "${var.project_name}-${var.project_segment}-${var.project_env}-vlm-ng-"
+  key_name    = aws_key_pair.eks_key_pair.key_name
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size = tonumber(var.eksProperty["VLM_NODE_DISK_SIZE"])
+      volume_type = "gp3"
+      encrypted   = true
+      kms_key_id  = var.kms_key_arn
+    }
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = merge(
+      var.tags,
+      {
+        Name = "${var.project_name}-${var.project_segment}-${var.project_env}-VLM-NG"
+      }
+    )
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+    tags = merge(
+      var.tags,
+      {
+        Name = "${var.project_name}-${var.project_segment}-${var.project_env}-VLM-NG-Volume"
+      }
+    )
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.project_name}-${var.project_segment}-${var.project_env}-VLM-NG-LT"
+    }
+  )
+}
+
 resource "aws_eks_node_group" "node_group_CEDE" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.project_name}-${var.project_segment}-${var.project_env}"
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = [var.private_subnet_01]
   instance_types  = [var.eksProperty["NODE_INSTANCE_TYPE"]]
-  disk_size       = tonumber(var.eksProperty["NODE_DISK_SIZE"])
+
+  launch_template {
+    id      = aws_launch_template.node_group_cede.id
+    version = aws_launch_template.node_group_cede.latest_version
+  }
 
   scaling_config {
     desired_size = tonumber(var.eksProperty["CEDE_DESIRED_SIZE"])
     max_size     = tonumber(var.eksProperty["CEDE_MAX_SIZE"])
     min_size     = tonumber(var.eksProperty["CEDE_MIN_SIZE"])
-  }
-
-  remote_access {
-    ec2_ssh_key               = aws_key_pair.eks_key_pair.key_name
-    source_security_group_ids = [aws_security_group.eks_remote_access.id]
   }
 
   depends_on = [
@@ -285,17 +370,16 @@ resource "aws_eks_node_group" "node_group_VLM" {
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = [var.private_subnet_01]
   instance_types  = [var.eksProperty["VLM_NODE_INSTANCE_TYPE"]]
-  disk_size       = tonumber(var.eksProperty["VLM_NODE_DISK_SIZE"])
+
+  launch_template {
+    id      = aws_launch_template.node_group_vlm.id
+    version = aws_launch_template.node_group_vlm.latest_version
+  }
 
   scaling_config {
     desired_size = tonumber(var.eksProperty["VLM_DESIRED_SIZE"])
     max_size     = tonumber(var.eksProperty["VLM_MAX_SIZE"])
     min_size     = tonumber(var.eksProperty["VLM_MIN_SIZE"])
-  }
-
-  remote_access {
-    ec2_ssh_key               = aws_key_pair.eks_key_pair.key_name
-    source_security_group_ids = [aws_security_group.eks_remote_access.id]
   }
 
   depends_on = [
