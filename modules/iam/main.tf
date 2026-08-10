@@ -1,6 +1,88 @@
 # Data source to get current AWS account ID
 data "aws_caller_identity" "current" {}
 
+resource "aws_iam_policy" "sync_export_policy" {
+  name        = "SyncExport-policy"
+  description = "Policy for SyncExport role to read secrets, access ECR, start SSM sessions, and decrypt KMS"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "SecretsRead"
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:ListSecrets",
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "EcrRead"
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:ListImages",
+          "ecr:DescribeImages",
+          "ecr:DescribeRepositories"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "SsmTunnel"
+        Effect = "Allow"
+        Action = [
+          "ssm:StartSession",
+          "ssm:TerminateSession",
+          "ssm:ResumeSession"
+        ]
+        Resource = [
+          "arn:aws:ec2:${var.region}:${data.aws_caller_identity.current.account_id}:instance/${var.bastion_instance_id}",
+          "arn:aws:ssm:${var.region}::document/AWS-StartPortForwardingSessionToRemoteHost"
+        ]
+      },
+      {
+        Sid    = "KmsDecryptSource"
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role" "sync_export_role" {
+  name = "SyncExport"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::823196744293:role/SyncOperator"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "sync_export_policy_attachment" {
+  policy_arn = aws_iam_policy.sync_export_policy.arn
+  role       = aws_iam_role.sync_export_role.name
+}
+
 # IAM Policy for secret readonly
 resource "aws_iam_policy" "secret_readonly_irsa" {
   name        = "secret-readonly-irsa"

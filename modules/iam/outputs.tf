@@ -1,3 +1,23 @@
+output "sync_export_role_arn" {
+  description = "ARN of the SyncExport IAM role"
+  value       = aws_iam_role.sync_export_role.arn
+}
+
+output "sync_export_role_name" {
+  description = "Name of the SyncExport IAM role"
+  value       = aws_iam_role.sync_export_role.name
+}
+
+output "sync_export_policy_arn" {
+  description = "ARN of the SyncExport IAM policy"
+  value       = aws_iam_policy.sync_export_policy.arn
+}
+
+output "sync_export_policy_name" {
+  description = "Name of the SyncExport IAM policy"
+  value       = aws_iam_policy.sync_export_policy.name
+}
+
 output "policy_arn" {
   description = "ARN of the secret readonly IAM policy"
   value       = aws_iam_policy.secret_readonly_irsa.arn
